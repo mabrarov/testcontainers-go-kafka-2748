@@ -31,7 +31,6 @@ require (
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.1.0 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
-	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
@@ -60,4 +59,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/testcontainers/testcontainers-go/modules/kafka => github.com/mabrarov/testcontainers-go/modules/kafka v0.0.0-20250515204615-0d62171c10d6
+replace github.com/testcontainers/testcontainers-go/modules/kafka => github.com/mabrarov/testcontainers-go/modules/kafka v0.0.0-20250523180836-45ffb5b5b119
+
+replace github.com/testcontainers/testcontainers-go => github.com/mabrarov/testcontainers-go v0.0.0-20250523180836-45ffb5b5b119
