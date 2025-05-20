@@ -144,53 +144,38 @@ State of container with Kafka checked **from the same host** where Docker Engine
 ```text
 $ docker ps -a
 CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS         PORTS                                                               NAMES
-cac0afcc121b   testcontainers/ryuk:0.11.0           "/bin/ryuk"              4 seconds ago   Up 4 seconds   0.0.0.0:33495->8080/tcp, [::]:33495->8080/tcp                       reaper_03da62cc8c553184cee2b5c45149d96edccd7976ebcef5410fc2a61325c57049
-9dfd9f6cc511   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   4 seconds ago   Up 3 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33496->9093/tcp, [::]:33496->9093/tcp   quizzical_hermann
-$ docker top 9dfd9f6cc511
+c36aae9b5302   testcontainers/ryuk:0.11.0           "/bin/ryuk"              8 seconds ago   Up 7 seconds   0.0.0.0:33516->8080/tcp, [::]:33516->8080/tcp                       reaper_2945bdfb5d843491ed4d83aaa53b071a4521f14a95f3a97a65dad31e84165a41
+a8cb692b6161   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   8 seconds ago   Up 7 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33517->9093/tcp, [::]:33517->9093/tcp   crazy_kalam
+$ docker top a8cb692b6161
 UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
-abrarovm            285645              285623              0                   21:48               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
-abrarovm            285859              285645              0                   21:49               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
-$ docker logs 9dfd9f6cc511
-$ nc -vz 127.0.0.1 33495
+abrarovm            306043              306020              0                   23:33               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            306316              306043              0                   23:33               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+$ docker logs a8cb692b6161
+$ nc -vz 127.0.0.1 33517
 Ncat: Version 7.92 ( https://nmap.org/ncat )
-Ncat: Connected to 127.0.0.1:33495.
+Ncat: Connected to 127.0.0.1:33517.
 Ncat: 0 bytes sent, 0 bytes received in 0.01 seconds.
 ```
 
 State of container with Kafka checked **from remote host** (comparing to host where Docker Engine runs) on Windows 11 24H2 when the test is stopped at breakpoint (PowerShell 5.1):
 
 ```text
-> docker -H 192.168.204.133:2375 version
-Client:
- Version:           28.1.1
- API version:       1.49
- Go version:        go1.23.8
- Git commit:        4eba377
- Built:             Fri Apr 18 09:53:24 2025
- OS/Arch:           windows/amd64
- Context:           default
+> docker ps -a
+CONTAINER ID   IMAGE                                COMMAND                  CREATED          STATUS          PORTS                                                               NAMES
+c36aae9b5302   testcontainers/ryuk:0.11.0           "/bin/ryuk"              43 seconds ago   Up 43 seconds   0.0.0.0:33516->8080/tcp, [::]:33516->8080/tcp                       reaper_2945bdfb5d843491ed4d83aaa53b071a4521f14a95f3a97a65dad31e84165a41
+a8cb692b6161   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   43 seconds ago   Up 43 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33517->9093/tcp, [::]:33517->9093/tcp   crazy_kalam
+> docker top a8cb692b6161
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+abrarovm            306043              306020              0                   23:33               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            306672              306043              0                   23:34               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+> docker logs a8cb692b6161
+> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33517
+TCP connect to (192.168.204.133 : 33517) failed
 
-Server: Docker Engine - Community
- Engine:
-  Version:          28.1.1
-  API version:      1.49 (minimum version 1.24)
-  Go version:       go1.23.8
-  Git commit:       01f442b
-  Built:            Fri Apr 18 09:52:20 2025
-  OS/Arch:          linux/amd64
-  Experimental:     false
- containerd:
-  Version:          1.7.27
-  GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
- runc:
-  Version:          1.2.5
-  GitCommit:        v1.2.5-0-g59923ef
- docker-init:
-  Version:          0.19.0
-  GitCommit:        de40ad0
-> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33495                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ComputerName            : 192.168.204.133
+
+ComputerName            : 192.168.204.133
 RemoteAddress           : 192.168.204.133
-RemotePort              : 33495
+RemotePort              : 33517
 NameResolutionResults   : 192.168.204.133
                           dev.local
                           dev.local
@@ -200,7 +185,9 @@ IsAdmin                 : False
 InterfaceAlias          : VMware Network Adapter VMnet8
 SourceAddress           : 192.168.204.1
 NetRoute (NextHop)      : 0.0.0.0
-TcpTestSucceeded        : True
+PingSucceeded           : True
+PingReplyDetails (RTT)  : 0 ms
+TcpTestSucceeded        : False
 ```
 
 Output of test:
@@ -208,9 +195,9 @@ Output of test:
 ```text
 === RUN   TestKafkaContainerStart
     testcontainers_kafka_test.go:16: starting container using image: confluentinc/confluent-local:7.5.0
-    testcontainers_kafka_test.go:28: successfully started container: 9dfd9f6cc511bd6995a191aea0567480de22ef40965e14cfc0cbbcda305053f7
-    testcontainers_kafka_test.go:22: terminating container: 9dfd9f6cc511bd6995a191aea0567480de22ef40965e14cfc0cbbcda305053f7
---- PASS: TestKafkaContainerStart (166.27s)
+    testcontainers_kafka_test.go:28: successfully started container: a8cb692b616196e4baf38e530cfaceaf5e8d3f69fd70e6bf7465f0f047bd72ff
+    testcontainers_kafka_test.go:22: terminating container: a8cb692b616196e4baf38e530cfaceaf5e8d3f69fd70e6bf7465f0f047bd72ff
+--- PASS: TestKafkaContainerStart (106.84s)
 PASS
 ```
 
@@ -224,17 +211,17 @@ State of container with Kafka checked from **the same host** where Docker Engine
 
 ```text
 $ docker ps -a
-CONTAINER ID   IMAGE                                COMMAND                  CREATED          STATUS          PORTS                                                               NAMES
-6968841865fd   testcontainers/ryuk:0.11.0           "/bin/ryuk"              47 seconds ago   Up 46 seconds   0.0.0.0:33508->8080/tcp, [::]:33508->8080/tcp                       reaper_357e99596f55b3638f9295c30f454967464ea632c3dad166a8159a095e767733
-7c274cbbe962   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   47 seconds ago   Up 44 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33509->9093/tcp, [::]:33509->9093/tcp   practical_grothendieck
-$ docker top 7c274cbbe962
+CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS         PORTS                                                               NAMES
+3054dcf954bc   testcontainers/ryuk:0.11.0           "/bin/ryuk"              2 minutes ago   Up 2 minutes   0.0.0.0:33514->8080/tcp, [::]:33514->8080/tcp                       reaper_78c66434cec24436dbfa80c8e2e87f28e286d698b674414ef2e2b205bc2169bf
+04ba25e43dd3   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   2 minutes ago   Up 2 minutes   8082/tcp, 9092/tcp, 0.0.0.0:33515->9093/tcp, [::]:33515->9093/tcp   competent_feynman
+$ docker top 04ba25e43dd3
 UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
-abrarovm            296846              296823              0                   22:45               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
-abrarovm            297435              296846              0                   22:46               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
-$ docker logs 7c274cbbe962
-$ nc -vz 127.0.0.1 33508
+abrarovm            303734              303710              0                   23:23               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            305141              303734              0                   23:25               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+$ docker logs 04ba25e43dd3
+$ nc -vz 127.0.0.1 33515
 Ncat: Version 7.92 ( https://nmap.org/ncat )
-Ncat: Connected to 127.0.0.1:33508.
+Ncat: Connected to 127.0.0.1:33515.
 Ncat: 0 bytes sent, 0 bytes received in 0.01 seconds.
 ```
 
@@ -243,17 +230,20 @@ State of container with Kafka checked **from remote host** (where the test runs)
 ```text
 > docker ps -a
 CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS         PORTS                                                               NAMES
-6968841865fd   testcontainers/ryuk:0.11.0           "/bin/ryuk"              7 seconds ago   Up 7 seconds   0.0.0.0:33508->8080/tcp, [::]:33508->8080/tcp                       reaper_357e99596f55b3638f9295c30f454967464ea632c3dad166a8159a095e767733
-7c274cbbe962   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   7 seconds ago   Up 4 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33509->9093/tcp, [::]:33509->9093/tcp   practical_grothendieck
-> docker top 7c274cbbe962
+3054dcf954bc   testcontainers/ryuk:0.11.0           "/bin/ryuk"              7 seconds ago   Up 7 seconds   0.0.0.0:33514->8080/tcp, [::]:33514->8080/tcp                       reaper_78c66434cec24436dbfa80c8e2e87f28e286d698b674414ef2e2b205bc2169bf
+04ba25e43dd3   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   7 seconds ago   Up 4 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33515->9093/tcp, [::]:33515->9093/tcp   competent_feynman
+> docker top 04ba25e43dd3
 UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
-abrarovm            296846              296823              0                   22:45               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
-abrarovm            297003              296846              0                   22:45               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
-> docker logs 7c274cbbe962
-> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33508
+abrarovm            303734              303710              0                   23:23               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            304379              303734              0                   23:24               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+> docker logs 04ba25e43dd3
+> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33515
+TCP connect to (192.168.204.133 : 33515) failed
+
+
 ComputerName            : 192.168.204.133
 RemoteAddress           : 192.168.204.133
-RemotePort              : 33508
+RemotePort              : 33515
 NameResolutionResults   : 192.168.204.133
                           dev.local
                           dev.local
@@ -263,7 +253,9 @@ IsAdmin                 : False
 InterfaceAlias          : VMware Network Adapter VMnet8
 SourceAddress           : 192.168.204.1
 NetRoute (NextHop)      : 0.0.0.0
-TcpTestSucceeded        : True
+PingSucceeded           : True
+PingReplyDetails (RTT)  : 0 ms
+TcpTestSucceeded        : False
 ```
 
 Output of test:
@@ -271,8 +263,8 @@ Output of test:
 ```text
 === RUN   TestKafkaContainerStart
     testcontainers_kafka_test.go:16: starting container using image: confluentinc/confluent-local:7.5.0
-    testcontainers_kafka_test.go:19: container start failed: generic container: start container: started hook: copy starter script: wait for exposed port: external check: check target: retries: 1 address: 192.168.204.133:33509: get state: Get "http://192.168.204.133:2375/v1.48/containers/7c274cbbe9622b3fa1a456dd90b9a0d0db462934d227c5cc067559f511ebce21/json": context deadline exceeded
---- FAIL: TestKafkaContainerStart (228.19s)
+    testcontainers_kafka_test.go:19: container start failed: generic container: start container: started hook: copy starter script: wait for exposed port: external check: check target: retries: 1 address: 192.168.204.133:33515: get state: Get "http://192.168.204.133:2375/v1.48/containers/04ba25e43dd3698f6d95a59f6b146cc9bd9d7102334d34f510713c4e70a76cf2/json": context deadline exceeded
+--- FAIL: TestKafkaContainerStart (165.63s)
 
 FAIL
 ```
