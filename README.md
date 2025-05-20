@@ -15,7 +15,7 @@ Reproducing https://github.com/testcontainers/testcontainers-go/issues/2748:
          Built:             Fri Apr 18 09:53:24 2025
          OS/Arch:           windows/amd64
          Context:           default
-        
+
         Server: Docker Engine - Community
          Engine:
           Version:          28.1.1
@@ -132,3 +132,151 @@ Please note that this issue doesn't happen if local Docker Engine is used,
 e.g. if test runs inside VM mentioned in description of environment at the top of this file.
 Docker bridge network is suspected to allow TCP connect to complete without error (and then TCP connection is reset)
 even if respective port is not listened inside container.
+
+# Local Docker Engine
+
+Below are results of running this test on Rocky Linux 9.5 against **local** Docker Engine 28.1.1 where the test passes **successfully**.
+
+Breakpoint is set at github.com/testcontainers/testcontainers-go/modules/kafka@v0.37.0/kafka.go:81 to pause the test at the point of time when container started, but Kafka (inside container) did not.
+
+State of container with Kafka checked **from the same host** where Docker Engine runs when the test is stopped at breakpoint:
+
+```text
+$ docker ps -a
+CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS         PORTS                                                               NAMES
+cac0afcc121b   testcontainers/ryuk:0.11.0           "/bin/ryuk"              4 seconds ago   Up 4 seconds   0.0.0.0:33495->8080/tcp, [::]:33495->8080/tcp                       reaper_03da62cc8c553184cee2b5c45149d96edccd7976ebcef5410fc2a61325c57049
+9dfd9f6cc511   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   4 seconds ago   Up 3 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33496->9093/tcp, [::]:33496->9093/tcp   quizzical_hermann
+$ docker top 9dfd9f6cc511
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+abrarovm            285645              285623              0                   21:48               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            285859              285645              0                   21:49               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+$ docker logs 9dfd9f6cc511
+$ nc -vz 127.0.0.1 33495
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: Connected to 127.0.0.1:33495.
+Ncat: 0 bytes sent, 0 bytes received in 0.01 seconds.
+```
+
+State of container with Kafka checked **from remote host** (comparing to host where Docker Engine runs) on Windows 11 24H2 when the test is stopped at breakpoint (PowerShell 5.1):
+
+```text
+> docker -H 192.168.204.133:2375 version
+Client:
+ Version:           28.1.1
+ API version:       1.49
+ Go version:        go1.23.8
+ Git commit:        4eba377
+ Built:             Fri Apr 18 09:53:24 2025
+ OS/Arch:           windows/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          28.1.1
+  API version:      1.49 (minimum version 1.24)
+  Go version:       go1.23.8
+  Git commit:       01f442b
+  Built:            Fri Apr 18 09:52:20 2025
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          1.7.27
+  GitCommit:        05044ec0a9a75232cad458027ca83437aae3f4da
+ runc:
+  Version:          1.2.5
+  GitCommit:        v1.2.5-0-g59923ef
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33495                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ComputerName            : 192.168.204.133
+RemoteAddress           : 192.168.204.133
+RemotePort              : 33495
+NameResolutionResults   : 192.168.204.133
+                          dev.local
+                          dev.local
+MatchingIPsecRules      :
+NetworkIsolationContext : Internet
+IsAdmin                 : False
+InterfaceAlias          : VMware Network Adapter VMnet8
+SourceAddress           : 192.168.204.1
+NetRoute (NextHop)      : 0.0.0.0
+TcpTestSucceeded        : True
+```
+
+Output of test:
+
+```text
+=== RUN   TestKafkaContainerStart
+    testcontainers_kafka_test.go:16: starting container using image: confluentinc/confluent-local:7.5.0
+    testcontainers_kafka_test.go:28: successfully started container: 9dfd9f6cc511bd6995a191aea0567480de22ef40965e14cfc0cbbcda305053f7
+    testcontainers_kafka_test.go:22: terminating container: 9dfd9f6cc511bd6995a191aea0567480de22ef40965e14cfc0cbbcda305053f7
+--- PASS: TestKafkaContainerStart (166.27s)
+PASS
+```
+
+# Remote Docker Engine
+
+Below are results of running this test on Windows 11 24H2 against **remote** Docker Engine 28.1.1 (192.168.204.133:2375) running on Rocky Linux 9.5 (192.168.204.133) where the test **fails**.
+
+Breakpoint is set at github.com/testcontainers/testcontainers-go/modules/kafka@v0.37.0/kafka.go:81 to pause the test at the point of time when container started, but Kafka (inside container) did not.
+
+State of container with Kafka checked from **the same host** where Docker Engine runs when the test is stopped at breakpoint:
+
+```text
+$ docker ps -a
+CONTAINER ID   IMAGE                                COMMAND                  CREATED          STATUS          PORTS                                                               NAMES
+6968841865fd   testcontainers/ryuk:0.11.0           "/bin/ryuk"              47 seconds ago   Up 46 seconds   0.0.0.0:33508->8080/tcp, [::]:33508->8080/tcp                       reaper_357e99596f55b3638f9295c30f454967464ea632c3dad166a8159a095e767733
+7c274cbbe962   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   47 seconds ago   Up 44 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33509->9093/tcp, [::]:33509->9093/tcp   practical_grothendieck
+$ docker top 7c274cbbe962
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+abrarovm            296846              296823              0                   22:45               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            297435              296846              0                   22:46               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+$ docker logs 7c274cbbe962
+$ nc -vz 127.0.0.1 33508
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: Connected to 127.0.0.1:33508.
+Ncat: 0 bytes sent, 0 bytes received in 0.01 seconds.
+```
+
+State of container with Kafka checked **from remote host** (where the test runs) when the test is stopped at breakpoint (PowerShell 5.1):
+
+```text
+> docker ps -a
+CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS         PORTS                                                               NAMES
+6968841865fd   testcontainers/ryuk:0.11.0           "/bin/ryuk"              7 seconds ago   Up 7 seconds   0.0.0.0:33508->8080/tcp, [::]:33508->8080/tcp                       reaper_357e99596f55b3638f9295c30f454967464ea632c3dad166a8159a095e767733
+7c274cbbe962   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   7 seconds ago   Up 4 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33509->9093/tcp, [::]:33509->9093/tcp   practical_grothendieck
+> docker top 7c274cbbe962
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+abrarovm            296846              296823              0                   22:45               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            297003              296846              0                   22:45               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+> docker logs 7c274cbbe962
+> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33508
+ComputerName            : 192.168.204.133
+RemoteAddress           : 192.168.204.133
+RemotePort              : 33508
+NameResolutionResults   : 192.168.204.133
+                          dev.local
+                          dev.local
+MatchingIPsecRules      :
+NetworkIsolationContext : Internet
+IsAdmin                 : False
+InterfaceAlias          : VMware Network Adapter VMnet8
+SourceAddress           : 192.168.204.1
+NetRoute (NextHop)      : 0.0.0.0
+TcpTestSucceeded        : True
+```
+
+Output of test:
+
+```text
+=== RUN   TestKafkaContainerStart
+    testcontainers_kafka_test.go:16: starting container using image: confluentinc/confluent-local:7.5.0
+    testcontainers_kafka_test.go:19: container start failed: generic container: start container: started hook: copy starter script: wait for exposed port: external check: check target: retries: 1 address: 192.168.204.133:33509: get state: Get "http://192.168.204.133:2375/v1.48/containers/7c274cbbe9622b3fa1a456dd90b9a0d0db462934d227c5cc067559f511ebce21/json": context deadline exceeded
+--- FAIL: TestKafkaContainerStart (228.19s)
+
+FAIL
+```
+
+The place where the test is stuck in debugger
+
+![debugger screenshot](debugger.png)
