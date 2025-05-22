@@ -227,45 +227,51 @@ State of container with Kafka checked from **the same host** where Docker Engine
 ```text
 $ docker ps -a
 CONTAINER ID   IMAGE                                COMMAND                  CREATED          STATUS          PORTS                                                               NAMES
-02c15f286f83   testcontainers/ryuk:0.11.0           "/bin/ryuk"              50 seconds ago   Up 49 seconds   0.0.0.0:33109->8080/tcp, [::]:33109->8080/tcp                       reaper_19bae5506339493c431aeb8f0b4817ddacf8656f71ec2e56a794bee2612ebb1f
-25abb1f264a5   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   50 seconds ago   Up 46 seconds   8082/tcp, 9092/tcp, 0.0.0.0:33110->9093/tcp, [::]:33110->9093/tcp   happy_austin
-$ docker top 25abb1f264a5
+7b4fe6f9b360   testcontainers/ryuk:0.11.0           "/bin/ryuk"              16 seconds ago   Up 15 seconds   0.0.0.0:32768->8080/tcp, [::]:32768->8080/tcp                       reaper_6461954d8f181db3edcf1c530cc39b02e69704ae64584bed88dcb9723931b3ed
+aab913cad229   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   16 seconds ago   Up 12 seconds   8082/tcp, 9092/tcp, 0.0.0.0:32769->9093/tcp, [::]:32769->9093/tcp   bold_lichterman
+$ docker top aab913cad229
 UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
-abrarovm            205189              205166              0                   02:14               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
-abrarovm            205711              205189              0                   02:15               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
-$ docker logs 25abb1f264a5
-$ nc -vz 127.0.0.1 33110
+abrarovm            2512                2489                1                   13:46               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+$ docker logs aab913cad229
+$ nc -vz 127.0.0.1 32769
 Ncat: Version 7.92 ( https://nmap.org/ncat )
-Ncat: Connected to 127.0.0.1:33110.
-Ncat: 0 bytes sent, 0 bytes received in 0.01 seconds.
-$ ./.build/dial 127.0.0.1:33110
-Connected to: "127.0.0.1:33110"
+Ncat: Connected to 127.0.0.1:32769.
+Ncat: 0 bytes sent, 0 bytes received in 0.02 seconds.
+$ ./.build/dial 127.0.0.1:32769
+Connected to: "127.0.0.1:32769"
+$ ip address show | grep 192
+    inet 192.168.204.133/24 brd 192.168.204.255 scope global dynamic noprefixroute ens160
+$ nc -vz 192.168.204.133 32769
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: Connection refused.
+$ ./.build/dial 192.168.204.133:32769
+Dial error: &os.SyscallError{Syscall:"connect", Err:0x6f}
 ```
 
 State of container with Kafka checked in Git Bash **from remote host** where the test runs when the test is stopped at breakpoint:
 
 ```text
 $ docker ps -a
-CONTAINER ID   IMAGE                                COMMAND                  CREATED              STATUS              PORTS                                                               NAMES
-02c15f286f83   testcontainers/ryuk:0.11.0           "/bin/ryuk"              About a minute ago   Up About a minute   0.0.0.0:33109->8080/tcp, [::]:33109->8080/tcp                       reaper_19bae5506339493c431aeb8f0b4817ddacf8656f71ec2e56a794bee2612ebb1f
-25abb1f264a5   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   About a minute ago   Up About a minute   8082/tcp, 9092/tcp, 0.0.0.0:33110->9093/tcp, [::]:33110->9093/tcp   happy_austin
-$ docker top 25abb1f264a5
+CONTAINER ID   IMAGE                                COMMAND                  CREATED         STATUS         PORTS                                                               NAMES
+7b4fe6f9b360   testcontainers/ryuk:0.11.0           "/bin/ryuk"              2 minutes ago   Up 2 minutes   0.0.0.0:32768->8080/tcp, [::]:32768->8080/tcp                       reaper_6461954d8f181db3edcf1c530cc39b02e69704ae64584bed88dcb9723931b3ed
+aab913cad229   confluentinc/confluent-local:7.5.0   "sh -c 'while [ ! -f…"   2 minutes ago   Up 2 minutes   8082/tcp, 9092/tcp, 0.0.0.0:32769->9093/tcp, [::]:32769->9093/tcp   bold_lichterman
+$ docker top aab913cad229
 UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
-abrarovm            205189              205166              0                   02:14               ?                   00:00:00            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
-abrarovm            206209              205189              0                   02:16               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
-$ docker logs 25abb1f264a5
-$ ./.build/dial.exe 192.168.204.133:33110
+abrarovm            2512                2489                0                   13:46               ?                   00:00:01            sh -c while [ ! -f /usr/sbin/testcontainers_start.sh ]; do sleep 0.1; done; bash /usr/sbin/testcontainers_start.sh
+abrarovm            4210                2512                0                   13:49               ?                   00:00:00            /usr/bin/coreutils --coreutils-prog-shebang=sleep /usr/bin/sleep 0.1
+$ docker logs aab913cad229
+$ ./.build/dial 192.168.204.133:32769
 Dial error: &os.SyscallError{Syscall:"connectex", Err:0x274d}
 ```
 
 State of container with Kafka checked in PowerShell 5.1 **from remote host** where the test runs when the test is stopped at breakpoint:
 
 ```text
-> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 33110                                                                         
-TCP connect to (192.168.204.133 : 33110) failed
+> Test-NetConnection -InformationLevel "Detailed" -ComputerName 192.168.204.133 -Port 32769                                                                         
+TCP connect to (192.168.204.133 : 32769) failed
 ComputerName            : 192.168.204.133
 RemoteAddress           : 192.168.204.133
-RemotePort              : 33110
+RemotePort              : 32769
 NameResolutionResults   : 192.168.204.133
                           dev.local
 MatchingIPsecRules      :
@@ -282,9 +288,9 @@ TcpTestSucceeded        : False
 State of container with Kafka checked **from remote host** running Ubuntu 24.04 and connected to the same network when the test is stopped at breakpoint:
 
 ```text
-$ nc -vz 192.168.204.133 33110
-nc: connect to 192.168.204.133 port 33110 (tcp) failed: Connection refused
-$ ./.build/dial 192.168.204.133:33110
+$ nc -vz 192.168.204.133 32769
+nc: connect to 192.168.204.133 port 32769 (tcp) failed: Connection refused
+$ ./.build/dial 192.168.204.133:32769
 Dial error: &os.SyscallError{Syscall:"connect", Err:0x6f}
 ```
 
@@ -293,7 +299,7 @@ Output of test:
 ```text
 === RUN   TestKafkaContainerStart
     testcontainers_kafka_test.go:16: starting container using image: confluentinc/confluent-local:7.5.0
-    testcontainers_kafka_test.go:19: container start failed: generic container: start container: started hook: copy starter script: wait for exposed port: external check: dial: dial tcp 192.168.204.133:33110: i/o timeout
+    testcontainers_kafka_test.go:19: container start failed: generic container: start container: started hook: copy starter script: wait for exposed port: external check: dial: dial tcp 192.168.204.133:32769: i/o timeout
 --- FAIL: TestKafkaContainerStart (399.42s)
 
 FAIL
