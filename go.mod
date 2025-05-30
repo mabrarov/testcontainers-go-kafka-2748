@@ -59,6 +59,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/testcontainers/testcontainers-go/modules/kafka => github.com/mabrarov/testcontainers-go/modules/kafka v0.0.0-20250527130949-58cc8a864cf1
+replace github.com/testcontainers/testcontainers-go/modules/kafka => github.com/mabrarov/testcontainers-go/modules/kafka v0.0.0-20250530214954-80aa134e7490
 
-replace github.com/testcontainers/testcontainers-go => github.com/mabrarov/testcontainers-go v0.0.0-20250527130949-58cc8a864cf1
+replace github.com/testcontainers/testcontainers-go => github.com/mabrarov/testcontainers-go v0.0.0-20250530214954-80aa134e7490
